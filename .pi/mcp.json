@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "playwright-mcp",
+        "--user-data-dir",
+        "/Users/karpinski94/Library/Application Support/agent-browser/chromium-profile"
+      ],
+      "exposure": "direct"
+    }
+  }
+}

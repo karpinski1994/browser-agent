@@ -1,0 +1,29 @@
+{
+  // Browser-side project: the Electron renderer.
+  //
+  // Separate from tsconfig.json because it is the only target with a
+  // DOM. It also excludes @types/node so browser code cannot silently
+  // rely on Node globals (`process`, `Buffer`, `__dirname`) that do not
+  // exist in the renderer.
+  //
+  // Shares src/shared so both processes agree on the IPC contracts.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "include": ["src/renderer/**/*.ts", "src/shared/**/*.ts"],
+
+  "exclude": ["node_modules", "out"]
+}

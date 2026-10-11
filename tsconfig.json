@@ -1,0 +1,47 @@
+{
+  // Node-side project: Electron main process, preload bridge, shared
+  // types, verification scripts, and the electron-vite config.
+  //
+  // Deliberately has NO DOM lib. The Electron main process has no
+  // `document`/`window`, so keeping DOM out means tsc will catch any
+  // accidental browser-global usage here.
+  //
+  // The preload is built to CommonJS by electron-vite (see the
+  // `format: "cjs"` entry in electron.vite.config.ts) because Electron's
+  // sandboxed preload cannot load ESM. That is a *build* concern handled
+  // by the bundler, not a typecheck concern: the preload's TypeScript
+  // source is still written with ESM `import` syntax, so it typechecks
+  // under the same settings as the main process.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+
+    // Vite/esbuild resolve imports themselves (extensionless, TS paths),
+    // so "bundler" matches how the code is actually built.
+    "moduleResolution": "Bundler",
+
+    "lib": ["ES2022"],
+    "types": ["node"],
+
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    // Vite compiles each file in isolation, so every file must be a
+    // valid module on its own.
+    "isolatedModules": true,
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "include": [
+    "src/main/**/*.ts",
+    "src/preload/**/*.ts",
+    "src/shared/**/*.ts",
+    "scripts/**/*.ts",
+    "electron.vite.config.ts"
+  ],
+
+  "exclude": ["node_modules", "out"]
+}

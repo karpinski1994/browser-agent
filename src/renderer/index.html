@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <title>Agent Browser</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+    }
+
+    body {
+      padding: 12px;
+    }
+
+    .panel {
+      width: 100%;
+      height: 100%;
+      padding: 14px;
+
+      border-radius: 14px;
+
+      background: rgba(20, 20, 20, 0.92);
+      color: white;
+
+      box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    textarea {
+      width: 100%;
+      height: 130px;
+
+      resize: none;
+
+      border: 0;
+      outline: none;
+
+      border-radius: 8px;
+
+      padding: 10px;
+
+      font-size: 14px;
+
+      background: #2b2b2b;
+      color: white;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 16px;
+
+      border: 0;
+      border-radius: 7px;
+
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    #drag-region {
+      -webkit-app-region: drag;
+    }
+
+    textarea,
+    button,
+    input {
+      -webkit-app-region: no-drag;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    #status {
+      margin-top: 0;
+
+      font-size: 12px;
+
+      opacity: 0.7;
+
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #status[data-tone="ready"] {
+      color: #9fe6a4;
+      opacity: 1;
+    }
+
+    #status[data-tone="busy"] {
+      color: #ffd08f;
+      opacity: 1;
+    }
+
+    #status[data-tone="error"] {
+      color: #ff9d9d;
+      opacity: 1;
+    }
+
+    .gear {
+      flex: none;
+
+      padding: 4px 9px;
+      font-size: 14px;
+      line-height: 1;
+
+      background: transparent;
+      color: inherit;
+      opacity: 0.6;
+      border-radius: 6px;
+    }
+
+    .gear:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .gear:focus-visible {
+      outline: 2px solid rgba(140, 170, 255, 0.75);
+      outline-offset: 1px;
+    }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 10px;
+
+      background: rgba(0, 0, 0, 0.55);
+
+      -webkit-app-region: no-drag;
+
+      z-index: 10;
+    }
+
+    .backdrop[hidden] {
+      display: none;
+    }
+
+    .dialog {
+      width: 100%;
+      max-height: 100%;
+
+      overflow-y: auto;
+
+      padding: 12px 14px;
+
+      border-radius: 12px;
+
+      background: rgba(28, 28, 28, 0.98);
+      color: white;
+
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      -webkit-app-region: drag;
+    }
+
+    .dialog h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .dialog-head button {
+      padding: 3px 8px;
+
+      background: transparent;
+      color: inherit;
+      opacity: 0.6;
+      border-radius: 6px;
+    }
+
+    .dialog-head button:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hint {
+      font-size: 11px;
+      opacity: 0.6;
+      margin: 6px 0 10px;
+    }
+
+    .field {
+      margin-bottom: 8px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      opacity: 0.75;
+      margin-bottom: 4px;
+    }
+
+    .field input {
+      width: 100%;
+
+      padding: 8px 10px;
+
+      border: 0;
+      outline: none;
+      border-radius: 8px;
+
+      background: #2b2b2b;
+      color: white;
+
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .field input:focus {
+      box-shadow: 0 0 0 2px rgba(130, 165, 255, 0.55);
+    }
+
+    .field input[aria-invalid="true"] {
+      box-shadow: 0 0 0 2px rgba(255, 120, 120, 0.6);
+    }
+
+    .error {
+      color: #ff9d9d;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .error:empty {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="panel" id="drag-region">
+    <textarea id="prompt" placeholder="Tell the agent what to do..."></textarea>
+
+    <div class="buttons">
+      <button id="submit">
+        Submit
+      </button>
+
+      <button id="steer" disabled>
+        Steer
+      </button>
+    </div>
+
+    <div class="footer">
+      <div id="status" role="status" aria-live="polite">
+        Starting agent...
+      </div>
+
+      <button
+        id="gear"
+        class="gear"
+        type="button"
+        aria-label="Open settings"
+        aria-haspopup="dialog"
+        title="Settings">
+        &#9881;
+      </button>
+    </div>
+  </div>
+
+  <div id="backdrop" class="backdrop" hidden>
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title">
+      <div class="dialog-head">
+        <h2 id="dialog-title">Connect a provider</h2>
+
+        <button id="cancel" type="button" aria-label="Close settings" hidden>
+          &#10005;
+        </button>
+      </div>
+
+      <p class="hint" id="dialog-hint"></p>
+
+      <form id="settings-form" novalidate>
+        <div class="field">
+          <label for="base-url">Base URL</label>
+
+          <input
+            id="base-url"
+            name="baseUrl"
+            type="url"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="https://api.openai.com/v1"
+            aria-describedby="base-url-error" />
+
+          <div class="error" id="base-url-error"></div>
+        </div>
+
+        <div class="field">
+          <label for="api-key">API key</label>
+
+          <input
+            id="api-key"
+            name="apiKey"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Enter API key"
+            aria-describedby="api-key-error" />
+
+          <div class="error" id="api-key-error"></div>
+        </div>
+
+        <div class="field">
+          <label for="model-id">Model ID</label>
+
+          <input
+            id="model-id"
+            name="modelId"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="gpt-4o-mini"
+            aria-describedby="model-id-error" />
+
+          <div class="error" id="model-id-error"></div>
+        </div>
+
+        <div class="error" id="form-error" role="alert"></div>
+
+        <div class="buttons">
+          <button id="save" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./renderer.ts"></script>
+</body>
+
+</html>

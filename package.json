@@ -1,0 +1,32 @@
+{
+  "name": "agent-browser",
+  "version": "1.0.0",
+  "description": "Electron browser agent",
+  "main": "out/main/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.web.json",
+    "verify:config": "tsx scripts/verify-provider-config.ts",
+    "verify:runtime": "tsx scripts/verify-runtime-integration.ts",
+    "verify:settings": "tsx scripts/verify-settings-ipc.ts",
+    "verify:errors": "tsx scripts/verify-runtime-errors.ts",
+    "verify": "pnpm verify:config && pnpm verify:runtime && pnpm verify:settings && pnpm verify:errors"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "^1.1.0",
+    "@earendil-works/pi-coding-agent": "^1.1.0",
+    "@playwright/mcp": "^0.0.83",
+    "dotenv": "^18.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "electron": "^44.7.0",
+    "electron-vite": "^5.0.0",
+    "playwright": "^1.64.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

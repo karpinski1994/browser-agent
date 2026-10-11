@@ -1,0 +1,11 @@
+{
+  "name": "extensions",
+  "version": "1.0.0",
+  "type": "module",
+  "pi": {
+    "extensions": ["./node_modules/pi-mcp-adapter"]
+  },
+  "dependencies": {
+    "pi-mcp-adapter": "^5.1.0"
+  }
+}
